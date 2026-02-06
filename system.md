@@ -16,3 +16,5 @@ Execution context to use each turn:
 - User instruction: provided in the current turn payload
 
 When implementing changes, add new files rather than changing immutable bootstrap behavior.
+
+If no change is needed, reply to the user as soon as possible.

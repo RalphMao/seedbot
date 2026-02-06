@@ -15,16 +15,16 @@ load_memory() {
   if [[ -x "$ROOT_DIR/memory/load.sh" ]]; then
     "$ROOT_DIR/memory/load.sh" || { log_error "memory/load.sh failed"; [[ -f "$ROOT_DIR/memory/context.md" ]] && cat "$ROOT_DIR/memory/context.md"; }
   elif [[ -f "$ROOT_DIR/memory/context.md" ]]; then
-    cat "$ROOT_DIR/memory/context.md"
+    head -n 50 "$ROOT_DIR/memory/context.md"
   fi
 }
 
 save_memory() {
   local entry="$1"
   if [[ -x "$ROOT_DIR/memory/save.sh" ]]; then
-    printf '%s\n' "$entry" | "$ROOT_DIR/memory/save.sh" || { log_error "memory/save.sh failed"; printf '%s\n' "$entry" > "$ROOT_DIR/memory/context.md"; }
+    printf '%s\n' "$entry" | "$ROOT_DIR/memory/save.sh" || { log_error "memory/save.sh failed"; printf '%s\n' "$entry" >> "$ROOT_DIR/memory/context.md"; }
   else
-    printf '%s\n' "$entry" > "$ROOT_DIR/memory/context.md"
+    printf '%s\n' "$entry" >> "$ROOT_DIR/memory/context.md"
   fi
 }
 
@@ -40,8 +40,7 @@ collect_messages() {
   shopt -u nullglob
 
   if [[ $got -eq 0 ]]; then
-    printf 'you> '
-    IFS= read -r line && [[ -n "$line" ]] && printf '%s\n' "$line"
+    IFS= read -r -t "$POLL_SECONDS" line && [[ -n "$line" ]] && printf '%s\n' "$line"
   fi
 }
 
@@ -81,7 +80,6 @@ while true; do
     printf 'assistant> processing...\n'
     if response="$(run_codex "$msg" "$memory_text")"; then
       printf '%s\n' "$response"
-      printf 'assistant> done.\n'
       save_memory "USER: $msg
 ASSISTANT: $response"
     else
