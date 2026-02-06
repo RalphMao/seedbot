@@ -29,19 +29,20 @@ save_memory() {
 }
 
 collect_messages() {
-  local got=0 plugin output
+  local plugin output
   shopt -s nullglob
   for plugin in "$ROOT_DIR/inputs.d"/*.sh; do
     [[ -x "$plugin" ]] || continue
-    got=1
     output="$($plugin 2>>"$ERROR_LOG")" || { log_error "input plugin failed: $plugin"; continue; }
-    [[ -n "$output" ]] && printf '%s\n' "$output"
+    if [[ -n "$output" ]]; then
+      printf '%s\n' "$output"
+      shopt -u nullglob
+      return
+    fi
   done
   shopt -u nullglob
 
-  if [[ $got -eq 0 ]]; then
-    IFS= read -r -t "$POLL_SECONDS" line && [[ -n "$line" ]] && printf '%s\n' "$line"
-  fi
+  IFS= read -r -t "$POLL_SECONDS" line && [[ -n "$line" ]] && printf '%s\n' "$line"
 }
 
 run_codex() {
