@@ -15,7 +15,7 @@ load_memory() {
   if [[ -x "$ROOT_DIR/memory/load.sh" ]]; then
     "$ROOT_DIR/memory/load.sh" || { log_error "memory/load.sh failed"; [[ -f "$ROOT_DIR/memory/context.md" ]] && cat "$ROOT_DIR/memory/context.md"; }
   elif [[ -f "$ROOT_DIR/memory/context.md" ]]; then
-    head -n 50 "$ROOT_DIR/memory/context.md"
+    tail -n 500 "$ROOT_DIR/memory/context.md"
   fi
 }
 
