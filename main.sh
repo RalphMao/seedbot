@@ -13,18 +13,19 @@ log_error() {
 
 load_memory() {
   if [[ -x "$ROOT_DIR/memory/load.sh" ]]; then
-    "$ROOT_DIR/memory/load.sh" || { log_error "memory/load.sh failed"; [[ -f "$ROOT_DIR/memory/context.md" ]] && cat "$ROOT_DIR/memory/context.md"; }
+    "$ROOT_DIR/memory/load.sh" || { log_error "memory/load.sh failed"; [[ -f "$ROOT_DIR/memory/context.md" ]] && tail -n 500 "$ROOT_DIR/memory/context.md"; }
   elif [[ -f "$ROOT_DIR/memory/context.md" ]]; then
     tail -n 500 "$ROOT_DIR/memory/context.md"
   fi
 }
 
-save_memory() {
-  local entry="$1"
+process_response() {
+  local user_query="$1"
+  local codex_response="$2"
   if [[ -x "$ROOT_DIR/memory/save.sh" ]]; then
-    printf '%s\n' "$entry" | "$ROOT_DIR/memory/save.sh" || { log_error "memory/save.sh failed"; printf '%s\n' "$entry" >> "$ROOT_DIR/memory/context.md"; }
+    printf '<USER> %s\n<ASSISTANT> %s\n' "$user_query" "$codex_response" | "$ROOT_DIR/memory/save.sh" || { log_error "memory/save.sh failed"; printf 'USER: %s\nASSISTANT: %s\n' "$user_query" "$codex_response" >> "$ROOT_DIR/memory/context.md"; }
   else
-    printf '%s\n' "$entry" >> "$ROOT_DIR/memory/context.md"
+    printf 'USER: %s\nASSISTANT: %s\n' "$user_query" "$codex_response" >> "$ROOT_DIR/memory/context.md"
   fi
 }
 
@@ -55,7 +56,6 @@ run_codex() {
 SYSTEM_PROMPT:
 $system_text
 
-MEMORY_DIR: $ROOT_DIR/memory
 MEMORY_CONTEXT:
 $memory_text
 
@@ -81,13 +81,11 @@ while true; do
     if response="$(run_codex "$msg" "$memory_text")"; then
       printf '%s\n' "$response"
       printf '=====end of response=====\n'
-      save_memory "USER: $msg
-ASSISTANT: $response"
+      process_response "$msg" "$response"
     else
       printf 'assistant> error: codex failed, check %s\n' "$ERROR_LOG"
       printf 'assistant> failed.\n'
-      save_memory "USER: $msg
-ASSISTANT: error: codex failed"
+      process_response "$msg" "error: codex failed"
     fi
   done <<< "$messages"
 
