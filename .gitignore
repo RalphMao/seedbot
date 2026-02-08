@@ -4,3 +4,5 @@
 !.gitignore
 !README.md
 !LICENSE
+!assets/
+!assets/*.png

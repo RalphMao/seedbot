@@ -1,6 +1,6 @@
-# SeedBot: Minimal, Self-Extensible Personal Assistant
+# SeedBot: Minimal, Self-Extending Personal Assistant
 
-SeedBot is a harness to turn Codex into a simple but extensible personal assistant. It is designed to be as minimal as possible, starting with only **coding** and **terminal input** capability, but can be instructed to build new capability over time.
+SeedBot is a lightweight harness to turn Codex into a self-extending personal assistant. It is designed to be as minimal as possible, starting with only **coding** and **terminal input** capability, but can be instructed to build new capability over time.
 
 SeedBot is inspired by [OpenClaw](https://github.com/openclaw/openclaw) and [nanobot](https://github.com/HKUDS/nanobot).
 
@@ -23,6 +23,24 @@ echo "pack the current non-git-tracked files, with corresponding git commit, int
 ```
 
 ## Examples
+
+<table align="center">
+  <tr align="center">
+    <th><p align="center">Setting Alarms</p></th>
+    <th><p align="center">Telgram Message</p></th>
+    <th><p align="center">System Control</p></th>
+  </tr>
+  <tr>
+    <td align="center"><p align="center"><img src="assets/alarm.png" width="240" height="400"></p></td>
+    <td align="center"><p align="center"><img src="assets/telegram.png" width="240" height="400"></p></td>
+    <td align="center"><p align="center"><img src="assets/sudo.png" width="240" height="400"></p></td>
+  </tr>
+  <tr>
+    <td align="center">SeedBot can build cron-like functionality and set alarms</td>
+    <td align="center">SeedBot can build Telegram interface and talk to you beyond terminal</td>
+    <td align="center">`sudo -v` gives SeedBot temporary admin access, allowing system access like sending you a desktop notification or even read/control your screen. <strong> Use it at your own risk! </strong> </td>
+  </tr>
+</table>
 
 
 ## Notes
