@@ -31,8 +31,8 @@ save_memory() {
 collect_messages() {
   local plugin output
   shopt -s nullglob
-  for plugin in "$ROOT_DIR/inputs.d"/*.sh; do
-    [[ -x "$plugin" ]] || continue
+  for plugin in "$ROOT_DIR/inputs.d"/*; do
+    [[ -f "$plugin" && -x "$plugin" ]] || continue
     output="$($plugin 2>>"$ERROR_LOG")" || { log_error "input plugin failed: $plugin"; continue; }
     if [[ -n "$output" ]]; then
       printf '%s\n' "$output"
@@ -68,7 +68,7 @@ EOT
   printf '%s\n' "$payload" | codex exec --full-auto --skip-git-repo-check - 2>>"$ERROR_LOG"
 }
 
-printf 'assistant> ready. type a message, or /exit to quit.\n'
+printf 'assistant> ready. type a message, or Ctrl-C to quit.\n'
 
 while true; do
   messages="$(collect_messages)"
@@ -76,11 +76,11 @@ while true; do
 
   while IFS= read -r msg; do
     [[ -z "$msg" ]] && continue
-    [[ "$msg" == "/exit" ]] && { printf 'assistant> bye.\n'; exit 0; }
     memory_text="$(load_memory || true)"
     printf 'assistant> processing...\n'
     if response="$(run_codex "$msg" "$memory_text")"; then
       printf '%s\n' "$response"
+      printf '=====end of response=====\n'
       save_memory "USER: $msg
 ASSISTANT: $response"
     else
