@@ -57,7 +57,6 @@ printf 'assistant> type a message, or Ctrl-C to quit.\n'
 while true; do
   msg=""
   source_name="terminal"
-  shopt -s nullglob
   for plugin in "$ROOT_DIR/inputs.d"/*; do
     [[ -f "$plugin" && -x "$plugin" ]] || continue
     output="$($plugin 2>>"$ERROR_LOG")" || { log_error "input plugin failed: $plugin"; continue; }
@@ -67,7 +66,6 @@ while true; do
       break
     fi
   done
-  shopt -u nullglob
 
   if [[ -z "$msg" ]] && IFS= read -r -t "$POLL_SECONDS" line && [[ -n "$line" ]]; then
     msg="$line"
