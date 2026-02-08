@@ -20,30 +20,14 @@ load_memory() {
 }
 
 process_response() {
-  local user_query="$1"
-  local codex_response="$2"
+  local source_name="$1"
+  local user_query="$2"
+  local codex_response="$3"
   if [[ -x "$ROOT_DIR/memory/save.sh" ]]; then
-    printf '<USER> %s\n<ASSISTANT> %s\n' "$user_query" "$codex_response" | "$ROOT_DIR/memory/save.sh" || { log_error "memory/save.sh failed"; printf 'USER: %s\nASSISTANT: %s\n' "$user_query" "$codex_response" >> "$ROOT_DIR/memory/context.md"; }
+     "$ROOT_DIR/memory/save.sh" "$source_name" "$user_query" "$codex_response" || { log_error "memory/save.sh failed"; printf 'USER: %s\nASSISTANT: %s\n' "$user_query" "$codex_response" >> "$ROOT_DIR/memory/context.md"; }
   else
     printf 'USER: %s\nASSISTANT: %s\n' "$user_query" "$codex_response" >> "$ROOT_DIR/memory/context.md"
   fi
-}
-
-collect_messages() {
-  local plugin output
-  shopt -s nullglob
-  for plugin in "$ROOT_DIR/inputs.d"/*; do
-    [[ -f "$plugin" && -x "$plugin" ]] || continue
-    output="$($plugin 2>>"$ERROR_LOG")" || { log_error "input plugin failed: $plugin"; continue; }
-    if [[ -n "$output" ]]; then
-      printf '%s\n' "$output"
-      shopt -u nullglob
-      return
-    fi
-  done
-  shopt -u nullglob
-
-  IFS= read -r -t "$POLL_SECONDS" line && [[ -n "$line" ]] && printf '%s\n' "$line"
 }
 
 run_codex() {
@@ -68,26 +52,33 @@ EOT
   printf '%s\n' "$payload" | codex exec --full-auto --skip-git-repo-check - 2>>"$ERROR_LOG"
 }
 
-printf 'assistant> ready. type a message, or Ctrl-C to quit.\n'
+printf 'assistant> type a message, or Ctrl-C to quit.\n'
 
 while true; do
-  messages="$(collect_messages)"
-  [[ -z "$messages" ]] && { sleep "$POLL_SECONDS"; continue; }
-
-  while IFS= read -r msg; do
-    [[ -z "$msg" ]] && continue
-    memory_text="$(load_memory || true)"
-    printf 'assistant> processing...\n'
-    if response="$(run_codex "$msg" "$memory_text")"; then
-      printf '%s\n' "$response"
-      printf '=====end of response=====\n'
-      process_response "$msg" "$response"
-    else
-      printf 'assistant> error: codex failed, check %s\n' "$ERROR_LOG"
-      printf 'assistant> failed.\n'
-      process_response "$msg" "error: codex failed"
+  msg=""
+  source_name="terminal"
+  shopt -s nullglob
+  for plugin in "$ROOT_DIR/inputs.d"/*; do
+    [[ -f "$plugin" && -x "$plugin" ]] || continue
+    output="$($plugin 2>>"$ERROR_LOG")" || { log_error "input plugin failed: $plugin"; continue; }
+    if [[ -n "$output" ]]; then
+      msg="$output"
+      source_name="$(basename "$plugin")"
+      break
     fi
-  done <<< "$messages"
+  done
+  shopt -u nullglob
 
-  sleep "$POLL_SECONDS"
+  if [[ -z "$msg" ]] && IFS= read -r -t "$POLL_SECONDS" line && [[ -n "$line" ]]; then
+    msg="$line"
+  fi
+  [[ -z "$msg" ]] && { sleep "$POLL_SECONDS"; continue; }
+
+  memory_text="$(load_memory || true)"
+  printf 'assistant> processing...\n'
+  response="$(run_codex "$msg" "$memory_text")" || response="assistant> error: codex failed, check $ERROR_LOG"
+  printf '%s\n' "$response"
+  printf '================end of response=================\n'
+  process_response "$source_name" "$msg" "$response"
+
 done
