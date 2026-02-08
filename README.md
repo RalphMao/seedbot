@@ -1,53 +1,61 @@
-# SeedBot: Minimal, Self-Extending Personal Assistant
+# SeedBot
 
-SeedBot is a lightweight harness to turn Codex into a self-extending personal assistant. It is designed to be as minimal as possible, starting with only **coding** and **terminal input** capability, but can be instructed to build new capability over time.
+A minimal harness that turns [Codex](https://openai.com/codex/) into a self-extending personal assistant.
 
-SeedBot is inspired by [OpenClaw](https://github.com/openclaw/openclaw) and [nanobot](https://github.com/HKUDS/nanobot).
+SeedBot starts with only two abilities: **coding** and **terminal input**. From there, it can build new capabilities upon requests.
 
-SeedBot has **under 100 lines of bash code**.
+Inspired by [OpenClaw](https://github.com/openclaw/openclaw) and [nanobot](https://github.com/HKUDS/nanobot).
 
-## Prerequisite
+> Built with **< 100 lines of Bash**.
 
-- Preconfigured Codex cli (GPT-5.3-Codex preferred)
-- Mac/Linux/WSL with bash environment
+## Prerequisites
 
-## How to run
-To start the assistant, simply run:
+- Preconfigured Codex CLI (GPT-5.3-Codex recommended)
+- macOS, Linux, or WSL with Bash
+
+## Quick Start
+
+Run SeedBot:
+
 ```bash
 ./main.sh
 ```
 
-If you like the assistant you "trained" over time, use the following command to checkpoint it for distribution:
+Checkpoint your trained assistant for distribution:
+
 ```bash
 echo "pack the current non-git-tracked files, with corresponding git commit, into my_assistant.tar for distribution. Remember to mask out the sensitive variables and keep non-sensitive variables in env.sh and don't pack files under logs" | codex exec --full-auto --skip-git-repo-check -
 ```
 
-## Examples
+## Showcase
 
-<table align="center">
+<table align="center" width="100%">
   <tr align="center">
-    <th><p align="center">Setting Alarms</p></th>
-    <th><p align="center">Telgram Message</p></th>
-    <th><p align="center">System Control</p></th>
+    <th width="33%"><p align="center">Set Alarms</p></th>
+    <th width="33%"><p align="center">Telegram Messaging</p></th>
+    <th width="33%"><p align="center">System Control</p></th>
   </tr>
   <tr>
-    <td align="center"><p align="center"><img src="assets/alarm.png" width="240" height="400"></p></td>
-    <td align="center"><p align="center"><img src="assets/telegram.png" width="240" height="400"></p></td>
-    <td align="center"><p align="center"><img src="assets/sudo.png" width="240" height="400"></p></td>
+    <td align="center" width="33%"><p align="center"><img src="assets/alarm.png" width="240" height="400" alt="Alarm example"></p></td>
+    <td align="center" width="33%"><p align="center"><img src="assets/telegram.png" width="240" height="400" alt="Telegram example"></p></td>
+    <td align="center" width="33%"><p align="center"><img src="assets/sudo.png" width="240" height="400" alt="Sudo example"></p></td>
   </tr>
   <tr>
-    <td align="center">SeedBot can build cron-like functionality and set alarms</td>
-    <td align="center">SeedBot can build Telegram interface and talk to you beyond terminal</td>
-    <td align="center">`sudo -v` gives SeedBot temporary admin access, allowing system access like sending you a desktop notification or even read/control your screen. <strong> Use it at your own risk! </strong> </td>
+    <td align="center" width="33%">Self-build cron-like reminders and then set alarms.</td>
+    <td align="center" width="33%">Self-build a Telegram interface to communicate outside the terminal.</td>
+    <td align="center" width="33%"><code>sudo -v</code> grants temporary admin access (for example, allowing desktop notifications or screen control). <br><strong>Use it at your own risk!</strong></td>
   </tr>
 </table>
 
+## Why Codex
+
+Codex is preferred over Claude Code for SeedBot because:
+
+- Codex handles complex logic and ambiguous requests more reliably.
+- OpenAI has more permissive legal terms for backend-in-app workflows, especially for subscriptions.
 
 ## Notes
 
-Codex is preferred over Claude Code for SeedBot, because:
+SeedBot is a proof of concept: coding is the only truly essential primitive for a capable personal assistant.
 
-- Codex shows better reasoning capability to overcome complex logics or ambiguous user requests.
-- Codex is more permissive for backend-in-app usage, while Claude Code only allows access-via-API if used as a backend.
-
-SeedBot is a proof-of-concept project to show that coding is the only must-to-have capability for a personal assistant. For robust use of codex, [App Server](https://developers.openai.com/codex/app-server/) is preferred over the current "call over bash" method.
+For production-grade setups, prefer [Codex App Server](https://developers.openai.com/codex/app-server/) over shell-piped invocation.
