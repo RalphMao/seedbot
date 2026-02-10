@@ -1,12 +1,17 @@
-# SeedBot
+# SeedBot: a self-evolving personal assistant
 
-A minimal harness that turns [Codex](https://openai.com/codex/) into a self-extending personal assistant.
+A minimal extensible harness that turns [Codex](https://openai.com/codex/) into a personal assistant.
 
 SeedBot starts with only two abilities: **coding** and **terminal input**. From there, it can build new capabilities upon requests.
 
 Inspired by [OpenClaw](https://github.com/openclaw/openclaw) and [nanobot](https://github.com/HKUDS/nanobot).
 
 > Built with **< 100 lines of Bash**.
+
+## TODO
+
+- [ ] Cross compare with nanobot (ongoing).
+- [ ] Further simplify `main.sh` in non-trivial ways.
 
 ## Prerequisites
 
