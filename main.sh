@@ -19,32 +19,24 @@ load_memory() {
   fi
 }
 
-process_response() {
-  local source_name="$1"
-  local user_query="$2"
-  local codex_response="$3"
+process_response() { # $1=source_name, $2=user_query, $3=codex_response
   if [[ -x "$ROOT_DIR/memory/save.sh" ]]; then
-     "$ROOT_DIR/memory/save.sh" "$source_name" "$user_query" "$codex_response" || { log_error "memory/save.sh failed"; printf 'USER: %s\nASSISTANT: %s\n' "$user_query" "$codex_response" >> "$ROOT_DIR/memory/context.md"; }
+     "$ROOT_DIR/memory/save.sh" "$1" "$2" "$3" || { log_error "memory/save.sh failed"; printf 'USER: %s\nASSISTANT: %s\n' "$2" "$3" >> "$ROOT_DIR/memory/context.md"; }
   else
-    printf 'USER: %s\nASSISTANT: %s\n' "$user_query" "$codex_response" >> "$ROOT_DIR/memory/context.md"
+    printf 'USER: %s\nASSISTANT: %s\n' "$2" "$3" >> "$ROOT_DIR/memory/context.md"
   fi
 }
 
-run_codex() {
-  local user_message="$1"
-  local memory_text="$2"
-  local system_text payload
-
-  system_text="$(cat "$ROOT_DIR/system.md" 2>>"$ERROR_LOG")"
-  payload="$(cat <<EOT
+run_codex() { # $1=user_message, $2=memory_text
+  local payload="$(cat <<EOT
 SYSTEM_PROMPT:
-$system_text
+$(cat "$ROOT_DIR/system.md")
 
 MEMORY_CONTEXT:
-$memory_text
+$2
 
 USER_INSTRUCTION:
-$user_message
+$1
 
 EOT
 )"
@@ -59,9 +51,8 @@ while true; do
   source_name="terminal"
   for plugin in "$ROOT_DIR/inputs.d"/*; do
     [[ -f "$plugin" && -x "$plugin" ]] || continue
-    output="$($plugin 2>>"$ERROR_LOG")" || { log_error "input plugin failed: $plugin"; continue; }
-    if [[ -n "$output" ]]; then
-      msg="$output"
+    msg="$($plugin 2>>"$ERROR_LOG")" || { log_error "input plugin failed: $plugin"; continue; }
+    if [[ -n "$msg" ]]; then
       source_name="$(basename "$plugin")"
       break
     fi
@@ -79,4 +70,4 @@ while true; do
   printf '================end of response=================\n'
   process_response "$source_name" "$msg" "$response"
 
-done
+  done
