@@ -11,7 +11,7 @@ Inspired by [OpenClaw](https://github.com/openclaw/openclaw) and [nanobot](https
 ## TODO
 
 - [ ] Cross compare with nanobot (ongoing).
-- [ ] Further simplify `main.sh` in non-trivial ways.
+- [ ] Simplify `main.sh` under 50 lines without sacraficing readability and extensibility.
 
 ## Prerequisites
 
