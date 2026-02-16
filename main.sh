@@ -28,20 +28,8 @@ process_response() { # $1=source_name, $2=user_query, $3=codex_response
 }
 
 run_codex() { # $1=user_message, $2=memory_text
-  local payload="$(cat <<EOT
-SYSTEM_PROMPT:
-$(cat "$ROOT_DIR/system.md")
-
-MEMORY_CONTEXT:
-$2
-
-USER_INSTRUCTION:
-$1
-
-EOT
-)"
-
-  printf '%s\n' "$payload" | codex exec --sandbox danger-full-access --yolo --skip-git-repo-check - 2>>"$ERROR_LOG"
+  local payload="SYSTEM_PROMPT:\n$(cat "$ROOT_DIR/system.md")\n\nMEMORY_CONTEXT:\n$2\n\nUSER_INSTRUCTION:\n$1\n"
+  printf '%b\n' "$payload" | codex exec --sandbox danger-full-access --yolo --skip-git-repo-check - 2>>"$ERROR_LOG"
 }
 
 printf 'assistant> type a message, or Ctrl-C to quit.\n'
