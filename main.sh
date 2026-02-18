@@ -49,7 +49,7 @@ $user_message
 EOT
 )"
 
-  printf '%s\n' "$payload" | codex exec --full-auto --skip-git-repo-check - 2>>"$ERROR_LOG"
+  printf '%s\n' "$payload" | codex exec --sandbox danger-full-access --yolo --skip-git-repo-check - 2>>"$ERROR_LOG"
 }
 
 printf 'assistant> type a message, or Ctrl-C to quit.\n'
