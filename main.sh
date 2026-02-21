@@ -53,9 +53,7 @@ process_response() { # $1=source_name, $2=user_query, $3=codex_response
 }
 
 run_codex() { # $1=user_message, $2=memory_text
-  local system_text payload
-  system_text="$(cat "$ROOT_DIR/system.md" 2>>"$ERROR_LOG")"
-  payload="SYSTEM_PROMPT:\n${system_text}\n\nMEMORY_CONTEXT:\n$2\n\nUSER_INSTRUCTION:\n$1\n"
+  local payload="SYSTEM_PROMPT:\n$(cat "$ROOT_DIR/system.md" 2>>"$ERROR_LOG")\n\nMEMORY_CONTEXT:\n$2\n\nUSER_INSTRUCTION:\n$1\n"
   if (( VERBOSE )); then
     printf '%b\n' "$payload" | codex exec --sandbox danger-full-access --yolo --skip-git-repo-check - 2> >(tee -a "$ERROR_LOG" >&2)
   else
