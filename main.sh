@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 set -u
 
+VERBOSE=0
+for arg in "$@"; do
+  case "$arg" in
+    --verbose|-v) VERBOSE=1 ;;
+  esac
+done
+
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 POLL_SECONDS="${POLL_SECONDS:-1}"
 HOOK_TIMEOUT_SECONDS=300
@@ -12,11 +19,17 @@ log_error() {
   printf '[%s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$1" >> "$ERROR_LOG"
 }
 
+TIMEOUT_CMD="$(command -v gtimeout || command -v timeout || true)"
+
 run_with_timeout() { # $1=timeout_secs, rest=command...
   local timeout_secs="$1" cmd="$2" rc
   shift 2
   local label="$(basename "$cmd")${*:+ $*}"
-  timeout --signal=TERM --kill-after=5 "${timeout_secs}s" "$cmd" "$@"
+  if [[ -n "$TIMEOUT_CMD" ]]; then
+    "$TIMEOUT_CMD" --signal=TERM --kill-after=5 "${timeout_secs}s" "$cmd" "$@"
+  else
+    "$cmd" "$@"
+  fi
   rc=$?
   case "$rc" in
     124|143)
@@ -46,8 +59,14 @@ process_response() { # $1=source_name, $2=user_query, $3=codex_response
 }
 
 run_codex() { # $1=user_message, $2=memory_text
-  local payload="SYSTEM_PROMPT:\n$(cat "$ROOT_DIR/system.md")\n\nMEMORY_CONTEXT:\n$2\n\nUSER_INSTRUCTION:\n$1\n"
-  printf '%b\n' "$payload" | codex exec --sandbox danger-full-access --yolo --skip-git-repo-check - 2>>"$ERROR_LOG"
+  local system_text payload
+  system_text="$(cat "$ROOT_DIR/system.md" 2>>"$ERROR_LOG")"
+  payload="SYSTEM_PROMPT:\n${system_text}\n\nMEMORY_CONTEXT:\n$2\n\nUSER_INSTRUCTION:\n$1\n"
+  if (( VERBOSE )); then
+    printf '%b\n' "$payload" | codex exec --sandbox danger-full-access --yolo --skip-git-repo-check - 2> >(tee -a "$ERROR_LOG" >&2)
+  else
+    printf '%b\n' "$payload" | codex exec --sandbox danger-full-access --yolo --skip-git-repo-check - 2>>"$ERROR_LOG"
+  fi
 }
 
 printf 'assistant> type a message, or Ctrl-C to quit.\n'
@@ -76,4 +95,4 @@ while true; do
   printf '================end of response=================\n'
   process_response "$source_name" "$msg" "$response"
 
-  done
+done
