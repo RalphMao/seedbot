@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 set -u
 
+VERBOSE=0
+for arg in "$@"; do
+  case "$arg" in
+    --verbose|-v) VERBOSE=1 ;;
+  esac
+done
+
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 POLL_SECONDS="${POLL_SECONDS:-1}"
 HOOK_TIMEOUT_SECONDS=300
@@ -46,8 +53,12 @@ process_response() { # $1=source_name, $2=user_query, $3=codex_response
 }
 
 run_codex() { # $1=user_message, $2=memory_text
-  local payload="SYSTEM_PROMPT:\n$(cat "$ROOT_DIR/system.md")\n\nMEMORY_CONTEXT:\n$2\n\nUSER_INSTRUCTION:\n$1\n"
-  printf '%b\n' "$payload" | codex exec --sandbox danger-full-access --yolo --skip-git-repo-check - 2>>"$ERROR_LOG"
+  local payload="SYSTEM_PROMPT:\n$(cat "$ROOT_DIR/system.md" 2>>"$ERROR_LOG")\n\nMEMORY_CONTEXT:\n$2\n\nUSER_INSTRUCTION:\n$1\n"
+  if (( VERBOSE )); then
+    printf '%b\n' "$payload" | codex exec --sandbox danger-full-access --yolo --skip-git-repo-check - 2> >(tee -a "$ERROR_LOG" >&2)
+  else
+    printf '%b\n' "$payload" | codex exec --sandbox danger-full-access --yolo --skip-git-repo-check - 2>>"$ERROR_LOG"
+  fi
 }
 
 printf 'assistant> type a message, or Ctrl-C to quit.\n'
@@ -76,4 +87,4 @@ while true; do
   printf '================end of response=================\n'
   process_response "$source_name" "$msg" "$response"
 
-  done
+done
