@@ -6,7 +6,7 @@ POLL_SECONDS="${POLL_SECONDS:-1}"
 HOOK_TIMEOUT_SECONDS=300
 ERROR_LOG="$ROOT_DIR/logs/errors.log"
 
-mkdir -p "$ROOT_DIR/memory" "$ROOT_DIR/inputs.d" "$ROOT_DIR/functions" "$ROOT_DIR/skills" "$ROOT_DIR/logs"
+mkdir -p "$ROOT_DIR/memory" "$ROOT_DIR/inputs.d" "$ROOT_DIR/functions" "$ROOT_DIR/workspace" "$ROOT_DIR/logs"
 
 log_error() {
   printf '[%s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$1" >> "$ERROR_LOG"
