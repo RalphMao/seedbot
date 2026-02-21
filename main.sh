@@ -19,17 +19,12 @@ log_error() {
   printf '[%s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$1" >> "$ERROR_LOG"
 }
 
-TIMEOUT_CMD="$(command -v gtimeout || command -v timeout || true)"
 
 run_with_timeout() { # $1=timeout_secs, rest=command...
   local timeout_secs="$1" cmd="$2" rc
   shift 2
   local label="$(basename "$cmd")${*:+ $*}"
-  if [[ -n "$TIMEOUT_CMD" ]]; then
-    "$TIMEOUT_CMD" --signal=TERM --kill-after=5 "${timeout_secs}s" "$cmd" "$@"
-  else
-    "$cmd" "$@"
-  fi
+  timeout --signal=TERM --kill-after=5 "${timeout_secs}s" "$cmd" "$@"
   rc=$?
   case "$rc" in
     124|143)
