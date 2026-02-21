@@ -19,7 +19,6 @@ log_error() {
   printf '[%s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$1" >> "$ERROR_LOG"
 }
 
-
 run_with_timeout() { # $1=timeout_secs, rest=command...
   local timeout_secs="$1" cmd="$2" rc
   shift 2
