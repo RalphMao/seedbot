@@ -45,26 +45,33 @@ process_response() { # $1=source_name, $2=user_query, $3=codex_response
 }
 
 run_codex() { # $1=user_message, $2=memory_text
-  local payload="SYSTEM_PROMPT:\n$(cat "$ROOT_DIR/system.md")\n\nMEMORY_CONTEXT:\n$2\n\nUSER_INSTRUCTION:\n$1\n"
+  local hash agent_file
+  hash="$(printf '%s%s' "$1" "$$" | md5sum 2>/dev/null || md5)"
+  hash="${hash:0:8}"
+  agent_file="$ROOT_DIR/workspace/agent_${hash}.md"
+  printf '# Agent %s\n- request: %s\n' "$hash" "${1:0:200}" > "$agent_file"
+
+  local payload="SYSTEM_PROMPT:\n$(cat "$ROOT_DIR/system.md")\n\nMEMORY_CONTEXT:\n$2\n\nAGENT_FILE:\n$agent_file\n\nUSER_INSTRUCTION:\n$1\n"
   if (( VERBOSE )); then
     printf '%b\n' "$payload" | codex exec --sandbox danger-full-access --yolo --skip-git-repo-check - 2> >(tee -a "$ERROR_LOG" >&2)
   else
     printf '%b\n' "$payload" | codex exec --sandbox danger-full-access --yolo --skip-git-repo-check - 2>>"$ERROR_LOG"
   fi
+
+  rm -f "$agent_file"
 }
 
 handle_message() { # $1=source_name, $2=message
-  local memory_text
+  local memory_text response
   memory_text="$(tail -n 500 "$ROOT_DIR/memory/context.md" 2>/dev/null)"
   printf '\nassistant> Receive message from [%s], processing...\n' "$1"
-  local response
   response="$(run_codex "$2" "$memory_text")" || response="assistant> Error: codex failed, check $ERROR_LOG"
   printf '%s\n' "$response"
   printf '================end of response=================\n'
   process_response "$1" "$2" "$response"
 }
 
-trap 'rmdir "$LOCK_DIR" 2>/dev/null; kill 0 2>/dev/null; wait' EXIT
+trap 'rmdir "$LOCK_DIR" 2>/dev/null; rm -f "$ROOT_DIR"/workspace/agent_*.md; kill 0 2>/dev/null; wait' EXIT
 
 printf 'assistant> type a message, or Ctrl-C to quit.\n'
 
