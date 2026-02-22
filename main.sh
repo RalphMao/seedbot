@@ -54,6 +54,7 @@ run_codex() { # $1=user_message, $2=memory_text
   else
     printf '%b\n' "$payload" | codex exec --sandbox danger-full-access --yolo --skip-git-repo-check - 2>>"$ERROR_LOG"
   fi
+  (( $? )) && printf 'assistant> Error: codex failed, check %s\n' "$ERROR_LOG"
 
   rm -f "$agent_file"
 }
@@ -62,7 +63,7 @@ handle_message() { # $1=source_name, $2=message
   local memory_text response
   memory_text="$(tail -n 500 "$ROOT_DIR/memory/context.md" 2>/dev/null)"
   printf '\nassistant> Receive message from [%s], processing...\n' "$1"
-  response="$(run_codex "$2" "$memory_text")" || response="assistant> Error: codex failed, check $ERROR_LOG"
+  response="$(run_codex "$2" "$memory_text")"
   printf '%s\n' "$response"
   printf '================end of response=================\n'
   process_response "$1" "$2" "$response"
