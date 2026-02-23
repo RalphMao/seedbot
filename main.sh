@@ -36,10 +36,10 @@ run_with_timeout() { # $1=timeout_secs, rest=command...
 
 process_response() { # $1=source_name, $2=user_query, $3=codex_response
   _lock
+  printf 'Response to request "%s" from [%s]:\n %s\n' "$2" "$1" "$3" >> "$ROOT_DIR/memory/context.md"
   if [[ -x "$ROOT_DIR/memory/save.sh" ]]; then
     run_with_timeout 300 "$ROOT_DIR/memory/save.sh" "$1" "$2" "$3" 2>>"$ERROR_LOG"
   fi
-  printf 'Response to request "%s" from [%s]:\n %s\n' "$2" "$1" "$3" >> "$ROOT_DIR/memory/context.md"
   _unlock
 }
 
