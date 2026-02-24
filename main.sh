@@ -44,7 +44,7 @@ process_response() { # $1=source_name, $2=user_query, $3=codex_response
 }
 
 run_codex() { # $1=user_message, $2=memory_text
-  local agent_file="$ROOT_DIR/workspace/agent_$BASHPID.md"
+  local agent_file=$(mktemp "$ROOT_DIR/workspace/agent_XXXXXX")
   printf '# Agent %s\n- request: %s\n' "$1" > "$agent_file"
 
   local payload="SYSTEM_PROMPT:\n$(cat "$ROOT_DIR/system.md")\n\nMEMORY_CONTEXT:\n$2\n\nAGENT_FILE:\n$agent_file\n\nUSER_INSTRUCTION:\n$1\n"
@@ -69,7 +69,17 @@ handle_message() { # $1=source_name, $2=message
   process_response "$1" "$2" "$response"
 }
 
-trap 'rmdir "$LOCK_DIR" 2>/dev/null; rm -f "$ROOT_DIR"/workspace/agent_*.md; kill 0 2>/dev/null; wait' EXIT
+_cleanup() {
+  trap '' INT TERM EXIT                # ignore signals so cleanup can finish
+  rmdir "$LOCK_DIR" 2>/dev/null
+  rm -f "$ROOT_DIR"/workspace/agent_*
+  printf 'assistant> Ending all child processes...\n'
+  kill -- -$$ 2>/dev/null              # SIGTERM entire process group
+  sleep 1
+  kill -9 -- -$$ 2>/dev/null           # SIGKILL stragglers
+}
+trap _cleanup EXIT
+trap 'exit 2' INT TERM
 
 printf 'assistant> type a message, or Ctrl-C to quit.\n'
 
