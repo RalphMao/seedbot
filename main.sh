@@ -61,7 +61,8 @@ run_codex() { # $1=user_message, $2=memory_text
   if (( VERBOSE )); then
     printf '%b\n' "$payload" | codex exec --sandbox danger-full-access --yolo --skip-git-repo-check - 2> >(tee -a "$ERROR_LOG" >&2)
   else
-    printf '%b\n' "$payload" | codex exec --sandbox danger-full-access --yolo --skip-git-repo-check - 2>>"$ERROR_LOG"
+    # printf '%b\n' "$payload" | codex exec --sandbox danger-full-access --yolo --skip-git-repo-check - 2>>"$ERROR_LOG"
+    claude --dangerously-skip-permissions -p "$payload" 2>>"$ERROR_LOG"
   fi
   (( $? )) && printf 'assistant> Error: codex failed, check %s\n' "$ERROR_LOG"
 
