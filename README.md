@@ -16,7 +16,7 @@ Inspired by [OpenClaw](https://github.com/openclaw/openclaw) and [nanobot](https
 
 ## Prerequisites
 
-- Preconfigured Codex CLI (GPT-5.3-Codex recommended)
+- Preconfigured Codex CLI (GPT-5.3-Codex/5.4 recommended)
 - macOS, Linux, or WSL with Bash
 
 ## Quick Start
@@ -24,6 +24,7 @@ Inspired by [OpenClaw](https://github.com/openclaw/openclaw) and [nanobot](https
 On macOS, install GNU coreutils and alias `timeout` to `gtimeout`. Also need to upgrade Bash since MacOS comes with an outdated Bash.
 
 ```bash
+# For MacOS
 brew install coreutils
 brew install bash
 alias timeout=gtimeout
@@ -35,10 +36,31 @@ Run SeedBot (add `-v` if you want to view codex execution details):
 ./main.sh
 ```
 
-Checkpoint your trained assistant for distribution:
+Pre-configured Slack integration:
+
+1. Download and extract the prepared Slack integration module:
 
 ```bash
-echo "pack the current non-git-tracked files, with corresponding git commit, into my_assistant.tar for distribution. Remember to mask out the sensitive variables and keep non-sensitive variables in env.sh and don't pack files under logs" | codex exec --full-auto --skip-git-repo-check -
+wget https://github.com/RalphMao/seedbot/releases/download/v0.3/slack_integration.tar
+tar xf slack_integration.tar
+```
+
+2. Create your own Slack workspace or use any existing workspace that allows app integration.
+
+3. Create a Slack app at https://api.slack.com/apps with an OAuth bot token. Grant the following scopes:
+   - `channels:history`
+   - `channels:read`
+   - `chat:write`
+   - `reactions:write`
+
+4. In your workspace, create a channel, invite the bot to it, and note the channel ID.
+
+5. Fill in `env.sh` with your bot token and channel ID.
+
+Checkpoint your "trained" assistant:
+
+```bash
+echo "pack the current non-git-tracked files, with corresponding git commit, into my_assistant.tar for distribution. Remember not to pack files under workspace/ and  logs/" | codex exec --full-auto --skip-git-repo-check -
 ```
 
 ## Showcase
