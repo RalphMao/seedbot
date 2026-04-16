@@ -59,7 +59,8 @@ run_codex() { # $1=user_message, $2=memory_text
 
   local payload="SYSTEM_PROMPT:\n$(cat "$ROOT_DIR/system.md")\n\nMEMORY_CONTEXT:\n$2\n\nAGENT_FILE:\n$agent_file\n\nUSER_INSTRUCTION:\n$1\n"
   if (( VERBOSE )); then
-    printf '%b\n' "$payload" | codex exec --sandbox danger-full-access --yolo --skip-git-repo-check - 2> >(tee -a "$ERROR_LOG" >&2)
+    # printf '%b\n' "$payload" | codex exec --sandbox danger-full-access --yolo --skip-git-repo-check - 2> >(tee -a "$ERROR_LOG" >&2)
+    claude --dangerously-skip-permissions -p "$payload" 2> >(tee -a "$ERROR_LOG" >&2)
   else
     # printf '%b\n' "$payload" | codex exec --sandbox danger-full-access --yolo --skip-git-repo-check - 2>>"$ERROR_LOG"
     claude --dangerously-skip-permissions -p "$payload" 2>>"$ERROR_LOG"
