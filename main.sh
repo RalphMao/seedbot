@@ -65,7 +65,7 @@ run_codex() { # $1=user_message, $2=memory_text
     # printf '%b\n' "$payload" | codex exec --sandbox danger-full-access --yolo --skip-git-repo-check - 2>>"$ERROR_LOG"
     claude --dangerously-skip-permissions -p "$payload" 2>>"$ERROR_LOG"
   fi
-  (( $? )) && printf 'assistant> Error: codex failed, check %s\n' "$ERROR_LOG"
+  (( $? )) && printf 'assistant> Error: claude code failed, check %s\n' "$ERROR_LOG"
 
   rm -f "$agent_file"
 }
