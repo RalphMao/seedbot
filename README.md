@@ -8,23 +8,15 @@ Inspired by [OpenClaw](https://github.com/openclaw/openclaw) and [nanobot](https
 
 > Built with **< 100 lines of Bash**.
 
-## TODO
-
-- [x] Cross compare with nanobot.
-- [x] Add timeout to prevent blocking calls.
-- [x] Support non-blocking launch of codex while still stick with <100 lines of code.
-
 ## Prerequisites
 
-- Preconfigured Codex CLI (GPT-5.3-Codex/5.4 recommended)
+- Preconfigured Codex CLI (GPT-5.5 recommended)
 - macOS, Linux, or WSL with Bash
 
 ## Quick Start
 
-On macOS, install GNU coreutils and alias `timeout` to `gtimeout`. Also need to upgrade Bash since MacOS comes with an outdated Bash.
-
 ```bash
-# For MacOS
+# This is pre-requisite for MacOS
 brew install coreutils
 brew install bash
 alias timeout=gtimeout
@@ -47,7 +39,7 @@ tar xf slack_integration.tar
 
 2. Create your own Slack workspace or use any existing workspace that allows app integration.
 
-3. Create a Slack app at https://api.slack.com/apps with an OAuth bot token. Grant the following scopes:
+3. [Create a Slack app](https://api.slack.com/apps) with an OAuth bot token. Grant the following scopes:
    - `channels:history`
    - `channels:read`
    - `chat:write`
